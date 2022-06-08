@@ -58,8 +58,8 @@ public class BuyerAgent extends ExternalAgent {
 			System.out.println("Buyer budget: " + this.getBudget());
 		
 			addBehaviour(new DFLAuctioneerSubsBehaviour(this,  DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "lot-auctioneer-service")));
-			addBehaviour(new DFClientSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "fish-selling-service")));
-			this.addBehaviour(new DFPhasesSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "phases-service")));
+			//addBehaviour(new DFClientSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "fish-selling-service")));
+			//this.addBehaviour(new DFPhasesSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "phases-service")));
 			
 			SecondState secondState = new SecondState(this);
 			

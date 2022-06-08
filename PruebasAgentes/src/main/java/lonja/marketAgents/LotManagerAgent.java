@@ -1,6 +1,5 @@
 package lonja.marketAgents;
 
-import java.security.acl.Owner;
 
 import commonAgents.MyAgent;
 import elements.lot.BringLot;

@@ -9,6 +9,7 @@ import commonBehaviours.DFServiceManager;
 import commonBehaviours.FishSubsManager;
 import commonBehaviours.FishSubsResponder;
 import commonBehaviours.MarketAchieveInitiator;
+import elements.auction.EndOfAuction;
 import elements.auction.StartOfAuction;
 import elements.lot.Lot;
 import factories.FactoriesNames;
@@ -68,20 +69,26 @@ public class AuctioneerAgent extends ServiceAgent {
 			
 			
 			
-			this.addBehaviour(new DFPhasesSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "phases-service")));
+			//	this.addBehaviour(new DFPhasesSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "phases-service")));
 			
 			// Creando el comportamiento de la subasta
+//			auctionFSM = new AuctionBehaviour(this);
+//			
+//			SecondState second = new SecondState(); 
+//			auctionFSM.registerFirstState( new FirstState(), "Start of Auction");
+//			auctionFSM.registerState(second, "CFP-INFORM");
+//			auctionFSM.registerState(new ThirdState(this), "Proposal Decisor"); // Meter el MT de la proposición
+//			auctionFSM.registerLastState(second, "CFP-INFORM");
+//			
+//			// En estos dos se pasa directamente
+//			auctionFSM.registerDefaultTransition("Start of Auction", "CFP-INFORM");
+//			auctionFSM.registerTransition("CFP-INFORM", "CFP-INFORM", 2);
+			
+			// Comportamiento de la subasta demo
 			auctionFSM = new AuctionBehaviour(this);
-			
-			SecondState second = new SecondState(); 
-			auctionFSM.registerFirstState( new FirstState(), "Start of Auction");
-			auctionFSM.registerState(second, "CFP-INFORM");
-			auctionFSM.registerState(new ThirdState(this), "Proposal Decisor"); // Meter el MT de la proposición
-			auctionFSM.registerLastState(second, "CFP-INFORM");
-			
-			// En estos dos se pasa directamente
-			auctionFSM.registerDefaultTransition("Start of Auction", "CFP-INFORM");
-			auctionFSM.registerTransition("CFP-INFORM", "CFP-INFORM", 2);
+			auctionFSM.registerFirstState(new FirstState(), "Start of Auction");
+			auctionFSM.registerLastState(new LastStatePrueba(), "End of Auction");
+			auctionFSM.registerDefaultTransition("Start of Auction", "End of Auction");
 			
 			// Si el último estado devuelve cero se vuelve al estado dos. En el último parámetro
 			// hay que poner los estados OneShot, seguramente. COMPROBAR
@@ -191,10 +198,25 @@ public class AuctioneerAgent extends ServiceAgent {
 				System.out.println("Notificando start of auction");
 				subscription.notify(msg);
 				}
+//			
+//			if(!auctionLots.isEmpty())
+//				actualLot = auctionLots.remove(0); // Puede ser que salte excepción si la lista esta vacía
 			
-			if(!auctionLots.isEmpty())
-				actualLot = auctionLots.remove(0); // Puede ser que salte excepción si la lista esta vacía
+			}
+	}
+	
+	private class LastStatePrueba extends OneShotBehaviour {
+
+		@Override
+		public void action() {
+			EndOfAuction sto = new EndOfAuction();
+			ACLMessage msg = ACLMaker.createMessageWithContentConceptNoReceiver(ACLMessage.INFORM, myAgent.getAID(), FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName()
+																				, factAuct.getOnto().getName(), ""+System.currentTimeMillis(), myAgent, sto);
 			
+			for(Subscription subscription: ((FishSubsManager) responder.getMySubscriptionManager()).getSubs()) {
+				System.out.println("Notificando end of auction");
+				subscription.notify(msg);
+				}
 			}
 	}
 	

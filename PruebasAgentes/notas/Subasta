@@ -1,0 +1,38 @@
+¿Qué necesito? Solo los agentes Comprador y Subastador. Pero también es necesario lanzar el Reloj.
+
+Para realizar la subasta, solo existirá un tipo de lote. El lote tendrá el precio de salida y el mínimo.
+El comprador tendrá su precio objetivo. Todo eso será fijo y se lo pasaré al Subastador.
+
+Primero comprobaré que se comunican en el primer estado y directamente pasarán al estado final en el que simplemente
+se enviarán un mensaje.
+
+Orden:
+
+Configurar el Launcher para que solo lance estos dos agentes.
+El AuctioneerAgent se suscribe en el DF y el Buyer lo busca. Entonces el Buyer debe de suscribirse al AuctionerAgent, ya que esto ya lo tenemos implementado. También necesitan al Clock.
+Tras esto podrán comunicarse. Es necesario eliminar otros comportamientos. Buscar otros agentes o realizar suscripciones u otros comportamientos que puedan ser ejecutados.
+El plan es que aparezcan el menor número de mensajes. Vamos a intentar hacer las cosas a través del HTML pero mostrando algunos mensajes por consola también.
+
+
+A ExternalAgent le quito la suscripción al agente de registro. A BuyerAgent le quito las suscripciones que no necesito.
+Elimino la suscripción a la subasta. Eso lo añadiré más adelante.
+
+El primer estado será el de notificar el comienzo de la subasta. El subastador no envía respuesta, espera al priemr CFP. Esto ya está implementado en AuctioneerAgent.
+Registro el primer estado y paso directamente al final.
+
+Voy a probar el FSM: Crearé un agente normal que tengo LOG que solo tendrá un comportamiento FSM. Con este puedo ir haciendo pruebas con el FSM. Este agente añade el FSM y ya está.
+Así veré los LOGS. En el Launcher tendré que lanzar solo este agente.
+
+AgenteFSM: Tres estados con varias transiciones. Funciona correctamente. Importante: si se crean transiciones normales, el valor que se indica es lo que tiene que devolver el
+método onEnd del estado s1. Así es como se pueden crear varias transiciones desde un mismo estado a varios.
+Si volvemos a un estado ya visitado NO es necesario hacer un reset de ese estado. El estado funcionará correctamente. Lo normal será usar OneShotBehaviour. ¡Si uso un CyclicBehaviour nunca se
+sale del estado! ya que este ¡NO termina!
+
+Por lo tanto, para que funcione correctamente, crear los estados y crear transiciones por defecto si de un estado se pasa a otro y siempre se pasará a ese.
+Si podemos pasar a dos estados crear dos transiciones normales con un evento de transición para cada una. Este código se deve devolver en el método onEnd de s1
+según alguna lógica.
+
+El reset es para resetear un comportamiento. Destruye un comportamiento y lo vuelve a crear. La función principal del método es realizar múltiples comportamientos cíclicos sin necesidad
+de construcciones complciadas y eliminación de objetos en cada iteración.
+
+Con esto ya puedo crear los dos FSMBehaviour de prueba para BuyerAgent y AuctioneerAgent.
