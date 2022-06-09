@@ -8,6 +8,7 @@ import commonBehaviours.DFServiceManager;
 import commonBehaviours.DFSubsBehaviour;
 import commonBehaviours.FishSubsInitiator;
 import commonBehaviours.MarketAchieveInitiator;
+import elements.auction.EndOfAuction;
 import elements.auction.StartOfAuction;
 import factories.FactoriesNames;
 import factories.FactoryGlobal;
@@ -56,24 +57,30 @@ public class BuyerAgent extends ExternalAgent {
 			
 			this.setBudget(LoaderManager.getBuyerArguments((String) args[0]));
 			System.out.println("Buyer budget: " + this.getBudget());
+			this.getContentManager().registerOntology(factAuct.getOnto());
 		
 			addBehaviour(new DFLAuctioneerSubsBehaviour(this,  DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "lot-auctioneer-service")));
 			//addBehaviour(new DFClientSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "fish-selling-service")));
 			//this.addBehaviour(new DFPhasesSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "phases-service")));
 			
-			SecondState secondState = new SecondState(this);
+//			SecondState secondState = new SecondState(this);
+//			
+//			auctionFSM = new AuctionBehaviour(this);
+//			auctionFSM.registerFirstState(new FirstState(this), "Waiting SOA");
+//			auctionFSM.registerState(secondState, "Waiting CFP-INFORM");
+//			// Este estado tiene unas transiciones dependientes de la situación. De momento es un estado inalcanzable
+//			auctionFSM.registerState(new ThirdsState(this), "Waiting Proposal Response");
+//			auctionFSM.registerLastState(secondState, "Waiting CFP-INFORM"); // Quizá se puede usar el mismo Behaviour, aunque a lo mejor no es conveniente		
+//			// Creo que el primero y el último deben de ser el mismo objeto
+//			
+//			// Las transiciones
+//			auctionFSM.registerDefaultTransition("Waiting SOA", "Waiting CFP-INFORM");
+//			auctionFSM.registerTransition("Waiting CFP-INFORM", "Waiting CFP-INFORM", 2);
 			
 			auctionFSM = new AuctionBehaviour(this);
 			auctionFSM.registerFirstState(new FirstState(this), "Waiting SOA");
-			auctionFSM.registerState(secondState, "Waiting CFP-INFORM");
-			// Este estado tiene unas transiciones dependientes de la situación. De momento es un estado inalcanzable
-			auctionFSM.registerState(new ThirdsState(this), "Waiting Proposal Response");
-			auctionFSM.registerLastState(secondState, "Waiting CFP-INFORM"); // Quizá se puede usar el mismo Behaviour, aunque a lo mejor no es conveniente		
-			// Creo que el primero y el último deben de ser el mismo objeto
-			
-			// Las transiciones
-			auctionFSM.registerDefaultTransition("Waiting SOA", "Waiting CFP-INFORM");
-			auctionFSM.registerTransition("Waiting CFP-INFORM", "Waiting CFP-INFORM", 2);		
+			auctionFSM.registerLastState(new LastState(this), "Waiting EOA"); // Quizá se puede usar el mismo Behaviour, aunque a lo mejor no es conveniente
+			auctionFSM.registerDefaultTransition("Waiting SOA", "Waiting EOA");
 			
 		}		
 	}
@@ -170,6 +177,8 @@ public class BuyerAgent extends ExternalAgent {
 		@Override
 		protected void agreeAgentPerfomance(ACLMessage agree) {
 			// Obtener los parámetros de la subasta
+			System.out.println("Agree del Subastador");
+			myAgent.addBehaviour(auctionFSM);
 		}
 		
 	}
@@ -217,6 +226,49 @@ public class BuyerAgent extends ExternalAgent {
 			
 		}
 		
+	}
+	
+	private class LastState extends MsgReceiver {
+		
+		public LastState(Agent a) {
+			super(a, MTMaker.createMT(ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName(), factAuct.getOnto().getName())
+					, MsgReceiver.INFINITE, null, null);
+		}
+		
+		@Override
+		protected void handleMessage(ACLMessage msg) {
+			
+			EndOfAuction eoa = null;
+			System.out.println("Inform recibido del Auctioneer: " + msg);
+			
+			try {
+				ContentElement ce = myAgent.getContentManager().extractContent(msg);
+				Concept cc = null;
+				if (ce instanceof Action) {
+					cc = ((Action) ce).getAction();
+					if(cc instanceof EndOfAuction) {
+						eoa = (EndOfAuction) cc;
+					}
+				}
+			} catch (UngroundedException e) {
+				e.printStackTrace();
+			} catch (CodecException e) {
+				e.printStackTrace();
+			} catch (OntologyException e) {
+				e.printStackTrace();
+			}
+			
+			if(eoa != null) {
+				System.out.println("End Of Auction recibido correctamente");
+				// Fin de la subasta
+			}
+			
+			else {
+				// Algo como desuscribirse
+			}
+			
+		}
+			
 	}
 	
 	private class SecondState extends MsgReceiver {

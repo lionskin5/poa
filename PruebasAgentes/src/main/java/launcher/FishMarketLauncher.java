@@ -31,14 +31,14 @@ public class FishMarketLauncher {
 		
 		if (args.length == 1) {
 			
-//			String config_file = args[0];
-//			Yaml yaml = new Yaml();
-//			InputStream inputStream = new FileInputStream(config_file);
-//			ScenarioLoader scenario = yaml.load(inputStream);
-//			
-			initLogging(args[0]);
+			String config_file = args[0];
+			Yaml yaml = new Yaml();
+			InputStream inputStream = new FileInputStream(config_file);
+			ScenarioLoader scenario = yaml.load(inputStream);
 			
-			//System.out.println(scenario);
+			initLogging(scenario.getName());
+			
+			System.out.println(scenario);
 			
 			// Obtenemos una instancia del entorno runtime de Jade
 			Runtime rt = Runtime.instance();
@@ -89,20 +89,20 @@ public class FishMarketLauncher {
 //			}
 			
 			// AuctioneerAgent
-//			LotStorage ls = new LotStorage();
-//			Object [] args2 = {ls};
-//			fact.createAgent("Subastador", lonja.marketAgents.AuctioneerAgent.class.getName(), args2); // Este puede que requiera argumentos más adelante
-//			
-//			// BuyerAgent
-//			List<ConfigLoader> bl = scenario.getBuyers();
-//			for(ConfigLoader buyer: bl) {
-//				Object[] buyerArgs = {buyer.getConfig()};
-//				fact.createAgent(buyer.getName(), lonja.buyerAgents.BuyerAgent.class.getName(), buyerArgs);
-//			}
+			LotStorage ls = new LotStorage();
+			Object [] args2 = {ls};
+			fact.createAgent("Subastador", lonja.marketAgents.AuctioneerAgent.class.getName(), args2); // Este puede que requiera argumentos más adelante
+			
+			// BuyerAgent
+			List<ConfigLoader> bl = scenario.getBuyers();
+			for(ConfigLoader buyer: bl) {
+				Object[] buyerArgs = {buyer.getConfig()};
+				fact.createAgent(buyer.getName(), lonja.buyerAgents.BuyerAgent.class.getName(), buyerArgs);
+			}
 			
 			
 			// AgenteFSM
-			fact.createAgent("AgenteFSM", lonja.pruebas.AgenteFSM.class.getName(), null);
+//			fact.createAgent("AgenteFSM", lonja.pruebas.AgenteFSM.class.getName(), null);
 		}		
 
 	}

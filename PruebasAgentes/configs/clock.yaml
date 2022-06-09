@@ -1,0 +1,4 @@
+!!loaders.ClockLoader
+unitTimeMillis: 1000
+numUnitDay: 60
+numSimDays: 1

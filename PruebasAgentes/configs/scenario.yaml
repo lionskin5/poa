@@ -1,0 +1,23 @@
+!!loaders.ScenarioLoader
+name: "LonjaSinSubasta"
+description: "Una configuracion para los agentes de la lonja"
+clock:
+  name: "Reloj"
+  config: "configs/clock.yaml"
+director:
+  name: "Director"
+  config: "configs/director.yaml"
+sea:
+  name: "Mar"
+  config: "configs/sea.yaml"
+client:
+  name: "Cliente"
+  config: "configs/client.yaml"
+sellers:
+  - name: "Vendedor1"
+    config: "configs/seller.yaml"
+  - name: "Vendedor2"
+    config: "configs/seller.yaml"
+buyers:
+  - name: "Comprador1"
+    config: "configs/buyer.yaml"

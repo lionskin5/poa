@@ -97,8 +97,6 @@ public class AuctioneerAgent extends ServiceAgent {
 			// El último también hay que reiniciarlo, es un OneShotBehaviour	
 			
 			this.addBehaviour(responder);
-		//	this.addBehaviour(auctionFSM); // No hay que meterla sin más, si no cuando el de fase avise.
-			
 			
 		}
 			
@@ -121,6 +119,7 @@ public class AuctioneerAgent extends ServiceAgent {
 		@Override
 		public ACLMessage createAgree(ACLMessage subscription) {
 			ACLMessage response = ACLMaker.createResponse(subscription, ACLMessage.AGREE); // Aquí habrá que enviar los parámetros de la subasta
+			myAgent.addBehaviour(auctionFSM); // No hay que meterla sin más, si no cuando el de fase avise.
 			return response;
 		}
 		
@@ -191,12 +190,16 @@ public class AuctioneerAgent extends ServiceAgent {
 		@Override
 		public void action() {
 			StartOfAuction sto = new StartOfAuction();
-			ACLMessage msg = ACLMaker.createMessageWithContentConceptNoReceiver(ACLMessage.INFORM, myAgent.getAID(), FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName()
-																				, factAuct.getOnto().getName(), ""+System.currentTimeMillis(), myAgent, sto);
+//			ACLMessage msg = ACLMaker.createMessageWithContentConceptNoReceiver(ACLMessage.INFORM, myAgent.getAID(), FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName()
+//																				, factAuct.getOnto().getName(), ""+System.currentTimeMillis(), myAgent, sto);
 			
 			for(Subscription subscription: ((FishSubsManager) responder.getMySubscriptionManager()).getSubs()) {
-				System.out.println("Notificando start of auction");
-				subscription.notify(msg);
+				System.out.println("Notificando start of auction al Buyer: " + subscription);
+				System.out.println("Enviando notificación de start of auction a: " + subscription.getMessage().getSender());
+				ACLMessage msg = ACLMaker.createMessageWithContentConcept(ACLMessage.INFORM, myAgent.getAID(), FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, subscription.getMessage().getSender(),
+																			getCodec().getName() , factAuct.getOnto().getName(), ""+System.currentTimeMillis(), myAgent, sto);
+				//subscription.notify(msg);
+				myAgent.send(msg);
 				}
 //			
 //			if(!auctionLots.isEmpty())
@@ -209,13 +212,16 @@ public class AuctioneerAgent extends ServiceAgent {
 
 		@Override
 		public void action() {
-			EndOfAuction sto = new EndOfAuction();
-			ACLMessage msg = ACLMaker.createMessageWithContentConceptNoReceiver(ACLMessage.INFORM, myAgent.getAID(), FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName()
-																				, factAuct.getOnto().getName(), ""+System.currentTimeMillis(), myAgent, sto);
-			
+			EndOfAuction eoa = new EndOfAuction();
+//			ACLMessage msg = ACLMaker.createMessageWithContentConceptNoReceiver(ACLMessage.INFORM, myAgent.getAID(), FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName()
+//																				, factAuct.getOnto().getName(), ""+System.currentTimeMillis(), myAgent, eoa);
+//			
 			for(Subscription subscription: ((FishSubsManager) responder.getMySubscriptionManager()).getSubs()) {
-				System.out.println("Notificando end of auction");
-				subscription.notify(msg);
+				System.out.println("Notificando end of auction al Buyer: " + subscription);
+				ACLMessage msg = ACLMaker.createMessageWithContentConcept(ACLMessage.INFORM, myAgent.getAID(), FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, subscription.getMessage().getSender(),
+																						getCodec().getName(), factAuct.getOnto().getName(), ""+System.currentTimeMillis(), myAgent, eoa);
+				//subscription.notify(msg);
+				myAgent.send(msg);
 				}
 			}
 	}

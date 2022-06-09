@@ -36,3 +36,11 @@ El reset es para resetear un comportamiento. Destruye un comportamiento y lo vue
 de construcciones complciadas y eliminación de objetos en cada iteración.
 
 Con esto ya puedo crear los dos FSMBehaviour de prueba para BuyerAgent y AuctioneerAgent.
+
+Ahora paso a crear el FSM de AuctioneerAgent y BuyerAgent:
+Primero serán con un estado inicial y uno final. El Auctioneer enviará un mensaje de inicio y de fin y el Buyer lo recibirá.
+Como tenemos que crera el protocolo de Dutch Auction tenemos que usar FSM con OneShotBehaviour ya que algunos estados envían mensajes sin esperar respuesta.
+Por eso el AuctioneerAgent envía los mensajes a través de OneShotBehaviour y el BuyerAgent los recibe a través de MsgReceiver.
+No llegaba el mensaje por el FSM en el BuyerAgent. El problema es que en el subastador lo notificaba a través de la subscripción por lo que el comportamiento
+que recibe este mensaje es el de FishSubsInitiator y no el FSM que es un MsgReceiver. Por lo tanto, en el subastador no debo de usar el método notify de subscription.
+Debo de enviar el mensaje de manera normal, con send.

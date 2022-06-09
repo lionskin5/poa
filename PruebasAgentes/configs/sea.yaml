@@ -1,0 +1,5 @@
+!!loaders.SeaLoader
+lowRange: 20
+mediumRange: 40
+highRange: 60
+topRange: 80
