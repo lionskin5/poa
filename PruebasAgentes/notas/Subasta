@@ -44,3 +44,22 @@ Por eso el AuctioneerAgent envía los mensajes a través de OneShotBehaviour y el 
 No llegaba el mensaje por el FSM en el BuyerAgent. El problema es que en el subastador lo notificaba a través de la subscripción por lo que el comportamiento
 que recibe este mensaje es el de FishSubsInitiator y no el FSM que es un MsgReceiver. Por lo tanto, en el subastador no debo de usar el método notify de subscription.
 Debo de enviar el mensaje de manera normal, con send.
+
+¿Cómo realizar la subasta varias veces?
+FSmBehaviour es un comportamiento OneShot por lo que al terminar se borra de la cola de comportamientos y no se puede hacer un reset del comportamiento.
+Por lo tanto, para realizarlo de nuevo es necesario crear el comportamiento de nuevo y añadirlo otra vez. Lo estoy haciendo en el onEnd del último estado.
+En el caso del proyecto real habrá que añadir el FSM en el Subastador cuando el Agente de Fases notifique la fase de la subasta. En el caso del Comprador
+habrá que añadir el FSM al principio y cuando este termine ya que al ser un MsgReceiver espera su momento. Comprobar en este caso, si se puede usar el mismo objeto
+Behaviour. Creo que no, creo que siempre habrá que crear uno nuevo.
+
+En las pruebas si vuelvo a introducir el comportamiento en ambos agentes envían y reciben los mensajes continuamente. En ese caso, puede ser que el Subastador envíe
+mensajes más rápido que lo que el comprador puede recibir, pero el comprador siempre los recibirá y en orden. Si hay más de un mensaje en cola y paro el subastador,
+el comprador los recibirá todos en orden y al terminar no se mostrarán más textos en la consola.
+
+
+Para realizar la subasta con el comprador: Primero creo el lote, y asigno los precios y el decremento del precio. Después hay que crear los estados en el Subastador.
+Es necesario crear el envío de los precios: Envía CFP y pasa a un estado de espera, en el que espera recibir un mensaje. En este estado espera x segundos y según si recibe
+un mensaje o no, pasa a un estado u otro.
+
+En el caso de la Subasta hay dos opciones. O todos los compradores están obligados a enviar un propose y uso ProposeInitiator y ProposeResponder o uso MsgReceiver con un timeout.
+Con Propose se puede indicar un tiemout pero en el iniciador, es decir, el comprador pero no en el que responde, el Subastador.

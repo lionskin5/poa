@@ -10,8 +10,11 @@ import commonBehaviours.FishSubsManager;
 import commonBehaviours.FishSubsResponder;
 import commonBehaviours.MarketAchieveInitiator;
 import elements.auction.EndOfAuction;
+import elements.auction.LotCFP;
 import elements.auction.StartOfAuction;
+import elements.lot.Fish;
 import elements.lot.Lot;
+import elements.lot.Range;
 import factories.FactoriesNames;
 import factories.FactoryGlobal;
 import factories.FactoryOntology;
@@ -25,6 +28,7 @@ import jade.lang.acl.MessageTemplate;
 import jade.proto.ProposeResponder;
 import jade.proto.SubscriptionResponder;
 import jade.proto.SubscriptionResponder.Subscription;
+import jade.proto.states.MsgReceiver;
 import makers.ACLMaker;
 import makers.LotStorage;
 import makers.MTMaker;
@@ -35,7 +39,12 @@ public class AuctioneerAgent extends ServiceAgent {
 	
 	private LotStorage lots;
 	private List<Lot> auctionLots = new ArrayList<Lot>(); // Cambiar luego
+	Lot lote1;
 	private Lot actualLot;
+	private int startingPrice;
+	private int minimumPrice;
+	private int priceDecrement;
+	private int sardinaPrice = 3;
 	private int actualPrice;
 	private boolean endOfAuction;
 	
@@ -67,7 +76,11 @@ public class AuctioneerAgent extends ServiceAgent {
 			this.getContentManager().registerOntology(factAuct.getOnto());
 			this.getContentManager().registerOntology(factPhases.getOnto());
 			
-			
+			lote1 = new Lot(Fish.SARDINA, Range.LOW, 10, 5);
+			startingPrice = 4*10;
+			minimumPrice = 4*7;
+			priceDecrement = 1;
+			actualPrice = startingPrice;
 			
 			//	this.addBehaviour(new DFPhasesSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "phases-service")));
 			
@@ -86,9 +99,15 @@ public class AuctioneerAgent extends ServiceAgent {
 			
 			// Comportamiento de la subasta demo
 			auctionFSM = new AuctionBehaviour(this);
-			auctionFSM.registerFirstState(new FirstState(), "Start of Auction");
+			auctionFSM.registerFirstState(new FirstState(), "Start of Auction");		
+			auctionFSM.registerState(new SecondStatePrueba(), "CFP");
+			auctionFSM.registerState(new WaitingState(null), "Waiting Proposal");
 			auctionFSM.registerLastState(new LastStatePrueba(), "End of Auction");
-			auctionFSM.registerDefaultTransition("Start of Auction", "End of Auction");
+			
+			auctionFSM.registerDefaultTransition("Start of Auction", "CFP");
+			auctionFSM.registerDefaultTransition("CFP", "Waiting Proposal");
+			auctionFSM.registerTransition("Waiting Proposal", "CFP", 2);
+			auctionFSM.registerTransition("Waiting Proposal", "End of Auction", 1);
 			
 			// Si el último estado devuelve cero se vuelve al estado dos. En el último parámetro
 			// hay que poner los estados OneShot, seguramente. COMPROBAR
@@ -221,9 +240,68 @@ public class AuctioneerAgent extends ServiceAgent {
 				ACLMessage msg = ACLMaker.createMessageWithContentConcept(ACLMessage.INFORM, myAgent.getAID(), FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, subscription.getMessage().getSender(),
 																						getCodec().getName(), factAuct.getOnto().getName(), ""+System.currentTimeMillis(), myAgent, eoa);
 				//subscription.notify(msg);
-				myAgent.send(msg);
+				myAgent.send(msg);	
 				}
 			}
+		
+		@Override
+		public int onEnd() {
+//			AuctionBehaviour auctionFSM = new AuctionBehaviour(myAgent);
+//			auctionFSM.registerFirstState(new FirstState(), "Start of Auction");
+//			auctionFSM.registerLastState(new LastStatePrueba(), "End of Auction");
+//			auctionFSM.registerDefaultTransition("Start of Auction", "End of Auction");
+//			myAgent.addBehaviour(auctionFSM);
+			return super.onEnd();
+		}
+	}
+	
+	private class SecondStatePrueba extends OneShotBehaviour {	
+		
+		@Override
+		public void action() {
+				
+			LotCFP lotCFP = new LotCFP(lote1, actualPrice);
+			
+			for(Subscription subscription: ((FishSubsManager) responder.getMySubscriptionManager()).getSubs()) {
+				ACLMessage CFP = ACLMaker.createMessageWithContentConcept(ACLMessage.CFP, myAgent.getAID(), FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, subscription.getMessage().getSender(),
+					getCodec().getName(), factAuct.getOnto().getName(), ""+System.currentTimeMillis(), myAgent, lotCFP);
+				myAgent.send(CFP);
+			}	
+			
+		}
+		
+	}
+	
+	// De momento, este estado pasa al estado que envía EndOfAuction
+	private class WaitingState extends MsgReceiver {
+		
+		private int msgReceived = 0;
+		
+		public WaitingState(Agent a) {
+			super(a, MTMaker.createMT(ACLMessage.PROPOSE, FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName(), factAuct.getOnto().getName())
+					, System.currentTimeMillis() + 3000, null, null);
+		}
+		
+		@Override
+		protected void handleMessage(ACLMessage msg) {
+			
+			//
+			if(msg != null) {
+				ACLMessage response = ACLMaker.createResponse(msg, ACLMessage.ACCEPT_PROPOSAL);
+				msgReceived = 1;
+				myAgent.send(response);
+			}
+			else { // Si el mensaje es null es porque ha expirado el tiempo de espera (en la documentación de MsgReceiver)
+				msgReceived = 2;
+			}	
+			
+		}
+		
+		@Override
+		public int onEnd() {
+			return msgReceived;
+		}
+		
 	}
 	
 	private class SecondState extends OneShotBehaviour {

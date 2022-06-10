@@ -9,7 +9,10 @@ import commonBehaviours.DFSubsBehaviour;
 import commonBehaviours.FishSubsInitiator;
 import commonBehaviours.MarketAchieveInitiator;
 import elements.auction.EndOfAuction;
+import elements.auction.LotCFP;
 import elements.auction.StartOfAuction;
+import elements.bank.BankAccount;
+import elements.bank.RegisterConvParam;
 import factories.FactoriesNames;
 import factories.FactoryGlobal;
 import factories.FactoryOntology;
@@ -21,11 +24,13 @@ import jade.content.onto.UngroundedException;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 import jade.proto.states.MsgReceiver;
 import loaders.LoaderManager;
+import lonja.marketAgents.BankAgent;
 import makers.ACLMaker;
 import makers.MTMaker;
 
@@ -178,7 +183,7 @@ public class BuyerAgent extends ExternalAgent {
 		protected void agreeAgentPerfomance(ACLMessage agree) {
 			// Obtener los parámetros de la subasta
 			System.out.println("Agree del Subastador");
-			myAgent.addBehaviour(auctionFSM);
+			addBehaviour(auctionFSM);
 		}
 		
 	}
@@ -195,7 +200,7 @@ public class BuyerAgent extends ExternalAgent {
 			
 			
 			StartOfAuction soa = null;
-			System.out.println("Inform recibido del Auctioneer: " + msg);
+			System.out.println("Inform recibido del Auctioneer: " + msg.getSender());
 			
 			try {
 				ContentElement ce = myAgent.getContentManager().extractContent(msg);
@@ -228,6 +233,46 @@ public class BuyerAgent extends ExternalAgent {
 		
 	}
 	
+	private class ProposeCFP extends MsgReceiver {
+		
+		private int buyLote = 0;
+
+		public ProposeCFP(Agent a) {			
+			super(a, MTMaker.createMT(ACLMessage.CFP, FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName(), factAuct.getOnto().getName())
+					, MsgReceiver.INFINITE, null, null); // En un principio siempre recibiremos el propose.		
+		}
+		
+		@Override
+		protected void handleMessage(ACLMessage msg) {
+			
+			ACLMessage response = null;
+			LotCFP lot = null;
+			
+			
+			try {
+				ContentElement ce = myAgent.getContentManager().extractContent(msg);
+				Concept cc = null;
+				if (ce instanceof Action) {
+					cc = ((Action) ce).getAction();
+					if(cc instanceof LotCFP) {
+						lot = (LotCFP) cc;
+						}
+					}
+			} catch (UngroundedException e) {
+				e.printStackTrace();
+			} catch (CodecException e) {
+				e.printStackTrace();
+			} catch (OntologyException e) {
+				e.printStackTrace();
+			}	
+			
+			System.out.println("Lote: " + lot.getLot() + " " + lot.getPrice());
+		}		
+		
+	}
+	
+	private class SendPropose extends
+	
 	private class LastState extends MsgReceiver {
 		
 		public LastState(Agent a) {
@@ -239,7 +284,7 @@ public class BuyerAgent extends ExternalAgent {
 		protected void handleMessage(ACLMessage msg) {
 			
 			EndOfAuction eoa = null;
-			System.out.println("Inform recibido del Auctioneer: " + msg);
+			System.out.println("Inform recibido del Auctioneer: " + msg.getSender());
 			
 			try {
 				ContentElement ce = myAgent.getContentManager().extractContent(msg);
@@ -259,7 +304,7 @@ public class BuyerAgent extends ExternalAgent {
 			}
 			
 			if(eoa != null) {
-				System.out.println("End Of Auction recibido correctamente");
+				System.out.println("End Of Auction recibido correctamente");				
 				// Fin de la subasta
 			}
 			
@@ -267,6 +312,16 @@ public class BuyerAgent extends ExternalAgent {
 				// Algo como desuscribirse
 			}
 			
+		}
+		
+		@Override
+		public int onEnd() {
+//			AuctionBehaviour auctionFSM = new AuctionBehaviour(myAgent);
+//			auctionFSM.registerFirstState(new FirstState(myAgent), "Waiting SOA");
+//			auctionFSM.registerLastState(new LastState(myAgent), "Waiting EOA"); // Quizá se puede usar el mismo Behaviour, aunque a lo mejor no es conveniente
+//			auctionFSM.registerDefaultTransition("Waiting SOA", "Waiting EOA");
+//			myAgent.addBehaviour(auctionFSM);
+			return super.onEnd();
 		}
 			
 	}
