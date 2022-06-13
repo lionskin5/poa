@@ -10,6 +10,7 @@ import commonBehaviours.FishSubsInitiator;
 import commonBehaviours.MarketAchieveInitiator;
 import elements.auction.EndOfAuction;
 import elements.auction.LotCFP;
+import elements.auction.ProposeDutchAuction;
 import elements.auction.StartOfAuction;
 import elements.bank.BankAccount;
 import elements.bank.RegisterConvParam;
@@ -24,6 +25,7 @@ import jade.content.onto.UngroundedException;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -43,6 +45,8 @@ public class BuyerAgent extends ExternalAgent {
 	private AuctionBehaviour auctionFSM;
 	private boolean lotAdquired;
 	private int numberLotsAdquired;
+	private LotCFP lotCFP;
+	private int priceLot;
 	
 	private FactoryOntology factAuct;
 	
@@ -82,12 +86,22 @@ public class BuyerAgent extends ExternalAgent {
 //			auctionFSM.registerDefaultTransition("Waiting SOA", "Waiting CFP-INFORM");
 //			auctionFSM.registerTransition("Waiting CFP-INFORM", "Waiting CFP-INFORM", 2);
 			
+			this.priceLot = 30;
+			
 			auctionFSM = new AuctionBehaviour(this);
 			auctionFSM.registerFirstState(new FirstState(this), "Waiting SOA");
-			auctionFSM.registerLastState(new LastState(this), "Waiting EOA"); // Quizá se puede usar el mismo Behaviour, aunque a lo mejor no es conveniente
-			auctionFSM.registerDefaultTransition("Waiting SOA", "Waiting EOA");
+			auctionFSM.registerState(new ProposeCFP(this), "Waiting CFP");
+			auctionFSM.registerState(new SendPropose(), "Send Propose");
+			auctionFSM.registerState(new EsperandoRespuesta(this), "Esperando respuesta");
+			auctionFSM.registerLastState(new LastState(), "Waiting EOA");	
+			auctionFSM.registerDefaultTransition("Waiting SOA", "Waiting CFP");
+			auctionFSM.registerTransition("Waiting CFP", "Waiting CFP", 1);
+			auctionFSM.registerTransition("Waiting CFP", "Send Propose", 2);
+			auctionFSM.registerTransition("Waiting CFP", "Waiting EOA", 3);
+			auctionFSM.registerDefaultTransition("Send Propose", "Esperando respuesta");
+			auctionFSM.registerDefaultTransition("Esperando respuesta", "Waiting CFP");
 			
-		}		
+		}
 	}
 	
 	
@@ -237,93 +251,146 @@ public class BuyerAgent extends ExternalAgent {
 		
 		private int buyLote = 0;
 
-		public ProposeCFP(Agent a) {			
-			super(a, MTMaker.createMT(ACLMessage.CFP, FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName(), factAuct.getOnto().getName())
-					, MsgReceiver.INFINITE, null, null); // En un principio siempre recibiremos el propose.		
+		public ProposeCFP(Agent a) {
+			
+			super(a, MTMaker.createMTOR(ACLMessage.CFP, ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName(), factAuct.getOnto().getName()),
+											MsgReceiver.INFINITE, null, null); // En un principio siempre recibiremos el propose.		
 		}
 		
 		@Override
 		protected void handleMessage(ACLMessage msg) {
 			
-			ACLMessage response = null;
-			LotCFP lot = null;
-			
-			
-			try {
-				ContentElement ce = myAgent.getContentManager().extractContent(msg);
-				Concept cc = null;
-				if (ce instanceof Action) {
-					cc = ((Action) ce).getAction();
-					if(cc instanceof LotCFP) {
-						lot = (LotCFP) cc;
+			if(msg.getPerformative() == ACLMessage.CFP) {
+				
+				System.out.println("Recibida una propuesta CFP");
+				
+				try {
+					ContentElement ce = myAgent.getContentManager().extractContent(msg);
+					Concept cc = null;
+					if (ce instanceof Action) {
+						cc = ((Action) ce).getAction();
+						if(cc instanceof LotCFP) {
+							lotCFP = (LotCFP) cc;
+							}
+						}
+				} catch (UngroundedException e) {
+					e.printStackTrace();
+				} catch (CodecException e) {
+					e.printStackTrace();
+				} catch (OntologyException e) {
+					e.printStackTrace();
+				}
+				
+				System.out.println("Lote: " + lotCFP.getLot() + " " + lotCFP.getPrice());
+				
+				// Decido si me interesa o no
+				if(lotCFP.getPrice() <= priceLot) {
+					buyLote = 2;
+				}
+				else {
+					buyLote = 1;
+				}		
+			}
+			else if (msg.getPerformative() == ACLMessage.INFORM) {
+				
+				EndOfAuction eoa = null;
+				System.out.println("Inform recibido del Auctioneer: " + msg.getSender());
+				
+				try {
+					ContentElement ce = myAgent.getContentManager().extractContent(msg);
+					Concept cc = null;
+					if (ce instanceof Action) {
+						cc = ((Action) ce).getAction();
+						if(cc instanceof EndOfAuction) {
+							eoa = (EndOfAuction) cc;
 						}
 					}
-			} catch (UngroundedException e) {
-				e.printStackTrace();
-			} catch (CodecException e) {
-				e.printStackTrace();
-			} catch (OntologyException e) {
-				e.printStackTrace();
-			}	
-			
-			System.out.println("Lote: " + lot.getLot() + " " + lot.getPrice());
-		}		
-		
-	}
-	
-	private class SendPropose extends
-	
-	private class LastState extends MsgReceiver {
-		
-		public LastState(Agent a) {
-			super(a, MTMaker.createMT(ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName(), factAuct.getOnto().getName())
-					, MsgReceiver.INFINITE, null, null);
-		}
-		
-		@Override
-		protected void handleMessage(ACLMessage msg) {
-			
-			EndOfAuction eoa = null;
-			System.out.println("Inform recibido del Auctioneer: " + msg.getSender());
-			
-			try {
-				ContentElement ce = myAgent.getContentManager().extractContent(msg);
-				Concept cc = null;
-				if (ce instanceof Action) {
-					cc = ((Action) ce).getAction();
-					if(cc instanceof EndOfAuction) {
-						eoa = (EndOfAuction) cc;
-					}
+				} catch (UngroundedException e) {
+					e.printStackTrace();
+				} catch (CodecException e) {
+					e.printStackTrace();
+				} catch (OntologyException e) {
+					e.printStackTrace();
 				}
-			} catch (UngroundedException e) {
-				e.printStackTrace();
-			} catch (CodecException e) {
-				e.printStackTrace();
-			} catch (OntologyException e) {
-				e.printStackTrace();
-			}
-			
-			if(eoa != null) {
-				System.out.println("End Of Auction recibido correctamente");				
-				// Fin de la subasta
-			}
-			
-			else {
-				// Algo como desuscribirse
-			}
+				
+				if(eoa != null) {
+					System.out.println("End Of Auction recibido correctamente");			
+					// Fin de la subasta
+				}
+				
+				else {
+					// Algo como desuscribirse
+				}
+				
+				buyLote = 3;			
+			}	
 			
 		}
 		
 		@Override
 		public int onEnd() {
-//			AuctionBehaviour auctionFSM = new AuctionBehaviour(myAgent);
-//			auctionFSM.registerFirstState(new FirstState(myAgent), "Waiting SOA");
-//			auctionFSM.registerLastState(new LastState(myAgent), "Waiting EOA"); // Quizá se puede usar el mismo Behaviour, aunque a lo mejor no es conveniente
-//			auctionFSM.registerDefaultTransition("Waiting SOA", "Waiting EOA");
-//			myAgent.addBehaviour(auctionFSM);
-			return super.onEnd();
+			super.onEnd();
+			return buyLote;
+		}
+		
+	}
+	
+	private class SendPropose extends OneShotBehaviour {
+	
+		@Override
+		public void action() {
+			
+			ProposeDutchAuction proposal = new ProposeDutchAuction();
+			proposal.setLot(lotCFP.getLot());
+			proposal.setPrice(lotCFP.getPrice());
+			
+			System.out.println("Propuesta del Buyer: " + proposal.getLot() + " " + proposal.getPrice());
+			
+			ACLMessage propose = ACLMaker.createMessageWithContentConcept(ACLMessage.PROPOSE, myAgent.getAID(), FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, auctioneerAgent, getCodec().getName(),
+																		factAuct.getOnto().getName(), ""+System.currentTimeMillis(), myAgent, proposal);
+			
+			myAgent.send(propose);
+					
+		}
+		
+		
+	}
+	
+	// Seguramente haya que separar la parte de PROPORSAL del EOA en dos estados distintos. Parece que cuando llega al estado final siempre termina, aunque haya una transición del estado final a otro estado o al mismo estado.
+	// Finalmente es así, del último estado no se puede pasar a otro estado o al mismo estado.
+	private class EsperandoRespuesta extends MsgReceiver {
+		
+		public EsperandoRespuesta(Agent a) {
+			super(a, MTMaker.createMTOR(ACLMessage.ACCEPT_PROPOSAL, ACLMessage.REJECT_PROPOSAL,  FIPANames.InteractionProtocol.FIPA_DUTCH_AUCTION, getCodec().getName(), factAuct.getOnto().getName()),
+						MsgReceiver.INFINITE, null, null);
+		}
+		
+		@Override
+		protected void handleMessage(ACLMessage msg) {
+			
+			System.out.println("Mensaje recibido: " + msg.getPerformative());
+			
+			if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+				System.out.println("Mi propuesta fue aceptada");
+				
+			}
+			
+			else if(msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
+				System.out.println("Mi propuesta fue rechazada");
+			}
 		}
 			
+	}
+	
+	private class LastState extends OneShotBehaviour {
+
+		@Override
+		public void action() {
+			System.out.println("Último estado del Buyer");
+			
+		}
+
+		
 	}
 	
 	private class SecondState extends MsgReceiver {
