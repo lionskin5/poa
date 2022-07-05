@@ -20,6 +20,7 @@ import jade.core.Runtime;
 import jade.wrapper.AgentContainer;
 import loaders.ConfigLoader;
 import loaders.ScenarioLoader;
+import makers.LotStorage;
 import utils.AgentLoggingHTMLFormatter;
 
 public class FishMarketLauncher {
@@ -60,32 +61,37 @@ public class FishMarketLauncher {
 			
 			// ClockAgent
 			//ClockAgentConfig cc = scenario.getClock();
-			ConfigLoader cl = scenario.getClock();
-			Object[] clockArgs = {cl.getConfig()};
-			System.out.println(cl);
-			fact.createAgent(cl.getName(), lonja.clock.ClockAgent.class.getName(), clockArgs);
+//			ConfigLoader cl = scenario.getClock();
+//			Object[] clockArgs = {cl.getConfig()};
+//			System.out.println(cl);
+//			fact.createAgent(cl.getName(), lonja.clock.ClockAgent.class.getName(), clockArgs);
 			
 			// Director
-			ConfigLoader dt = scenario.getDirector();
-			Object[] directorArgs = {dt.getConfig()};
-			fact.createAgent(dt.getName(), lonja.marketAgents.Director.class.getName(), directorArgs);
+//			ConfigLoader dt = scenario.getDirector();
+//			Object[] directorArgs = {dt.getConfig()};
+//			fact.createAgent(dt.getName(), lonja.marketAgents.Director.class.getName(), directorArgs);
+//			
+			// SeaAgent
+//			ConfigLoader sea = scenario.getSea();
+//			Object[] seaArgs = {sea.getConfig()};
+//			fact.createAgent(sea.getName(), lonja.worldAgents.SeaAgent.class.getName(), seaArgs);
 			
 			// SeaAgent
-			ConfigLoader sea = scenario.getSea();
-			Object[] seaArgs = {sea.getConfig()};
-			fact.createAgent(sea.getName(), lonja.worldAgents.SeaAgent.class.getName(), seaArgs);
-			
-			// SeaAgent
-			ConfigLoader client = scenario.getClient();
-			Object[] clientArgs = {client.getConfig()};
-			fact.createAgent(client.getName(), lonja.worldAgents.ClientAgent.class.getName(), clientArgs);
+//			ConfigLoader client = scenario.getClient();
+//			Object[] clientArgs = {client.getConfig()};
+//			fact.createAgent(client.getName(), lonja.worldAgents.ClientAgent.class.getName(), clientArgs);
 			
 			// SellerAgent
-			List<ConfigLoader> sl = scenario.getSellers();
-			for(ConfigLoader seller: sl) {
-				Object[] sellerArgs = {seller.getConfig()};
-				fact.createAgent(seller.getName(), lonja.sellerAgents.SellerAgent.class.getName(), sellerArgs);
-			}
+//			List<ConfigLoader> sl = scenario.getSellers();
+//			for(ConfigLoader seller: sl) {
+//				Object[] sellerArgs = {seller.getConfig()};
+//				fact.createAgent(seller.getName(), lonja.sellerAgents.SellerAgent.class.getName(), sellerArgs);
+//			}
+			
+			// AuctioneerAgent
+			LotStorage ls = new LotStorage();
+			Object [] args2 = {ls};
+			fact.createAgent("Subastador", lonja.marketAgents.AuctioneerAgent.class.getName(), args2); // Este puede que requiera argumentos más adelante
 			
 			// BuyerAgent
 			List<ConfigLoader> bl = scenario.getBuyers();
@@ -94,7 +100,10 @@ public class FishMarketLauncher {
 				fact.createAgent(buyer.getName(), lonja.buyerAgents.BuyerAgent.class.getName(), buyerArgs);
 			}
 			
-		}			
+			
+			// AgenteFSM
+//			fact.createAgent("AgenteFSM", lonja.pruebas.AgenteFSM.class.getName(), null);
+		}		
 
 	}
 	

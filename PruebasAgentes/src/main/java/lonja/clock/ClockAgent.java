@@ -181,7 +181,7 @@ public class ClockAgent extends ServiceAgent {
 			for(Subscription subscription: ((FishSubsManager) responder.getMySubscriptionManager()).getSubs()) {
 				subscription.notify(msg);
 			}
-		}	
+		}
 		
 		
 		

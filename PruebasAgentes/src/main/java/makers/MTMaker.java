@@ -51,7 +51,7 @@ public class MTMaker {
 		MessageTemplate mt = MessageTemplate.or(createMT(perf1, protocol, codec, ontology)
 												, createMT(perf2, protocol, codec, ontology));	
 			
-		System.out.println("El MT: " + mt.toString());
+		System.out.println("El MT OR: " + mt.toString());
 		
 		return mt;	
 	}

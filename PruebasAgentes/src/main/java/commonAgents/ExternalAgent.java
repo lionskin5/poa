@@ -57,8 +57,8 @@ public abstract class ExternalAgent extends MyAgent {
 		factRegist = (FactoryOntology) FactoryGlobal.getInstancia(FactoriesNames.REGISTERFACTORY);
 		factBank = (FactoryOntology) FactoryGlobal.getInstancia(FactoriesNames.BANKFACTORY);
 			
-		System.out.println("External DF Register entrando");
-		addBehaviour(new DFRegisterSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "register-service")));
+		//System.out.println("External DF Register entrando");
+		//addBehaviour(new DFRegisterSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "register-service")));
 		//addBehaviour(new DFBankSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "bank-service")));
 		
 //		MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM), MessageTemplate.MatchProtocol("fipa-subscribe"));
