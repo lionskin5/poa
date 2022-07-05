@@ -60,25 +60,25 @@ public class FishMarketLauncher {
 			
 			// ClockAgent
 			//ClockAgentConfig cc = scenario.getClock();
-			ConfigLoader cl = scenario.getClock();
-			Object[] clockArgs = {cl.getConfig()};
-			System.out.println(cl);
-			fact.createAgent(cl.getName(), lonja.clock.ClockAgent.class.getName(), clockArgs);
+//			ConfigLoader cl = scenario.getClock();
+//			Object[] clockArgs = {cl.getConfig()};
+//			System.out.println(cl);
+//			fact.createAgent(cl.getName(), lonja.clock.ClockAgent.class.getName(), clockArgs);
 			
 			// Director
-			ConfigLoader dt = scenario.getDirector();
-			Object[] directorArgs = {dt.getConfig()};
-			fact.createAgent(dt.getName(), lonja.marketAgents.Director.class.getName(), directorArgs);
+//			ConfigLoader dt = scenario.getDirector();
+//			Object[] directorArgs = {dt.getConfig()};
+//			fact.createAgent(dt.getName(), lonja.marketAgents.Director.class.getName(), directorArgs);
 			
 			// SeaAgent
 			ConfigLoader sea = scenario.getSea();
 			Object[] seaArgs = {sea.getConfig()};
 			fact.createAgent(sea.getName(), lonja.worldAgents.SeaAgent.class.getName(), seaArgs);
 			
-			// SeaAgent
-			ConfigLoader client = scenario.getClient();
-			Object[] clientArgs = {client.getConfig()};
-			fact.createAgent(client.getName(), lonja.worldAgents.ClientAgent.class.getName(), clientArgs);
+			// ClientAgent
+//			ConfigLoader client = scenario.getClient();
+//			Object[] clientArgs = {client.getConfig()};
+//			fact.createAgent(client.getName(), lonja.worldAgents.ClientAgent.class.getName(), clientArgs);
 			
 			// SellerAgent
 			List<ConfigLoader> sl = scenario.getSellers();
@@ -88,11 +88,11 @@ public class FishMarketLauncher {
 			}
 			
 			// BuyerAgent
-			List<ConfigLoader> bl = scenario.getBuyers();
-			for(ConfigLoader buyer: bl) {
-				Object[] buyerArgs = {buyer.getConfig()};
-				fact.createAgent(buyer.getName(), lonja.buyerAgents.BuyerAgent.class.getName(), buyerArgs);
-			}
+//			List<ConfigLoader> bl = scenario.getBuyers();
+//			for(ConfigLoader buyer: bl) {
+//				Object[] buyerArgs = {buyer.getConfig()};
+//				fact.createAgent(buyer.getName(), lonja.buyerAgents.BuyerAgent.class.getName(), buyerArgs);
+//			}
 			
 		}			
 
