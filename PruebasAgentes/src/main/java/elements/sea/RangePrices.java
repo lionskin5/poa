@@ -55,5 +55,12 @@ public class RangePrices implements Concept {
 	public void setHighRangeTop(double highRangeTop) {
 		this.highRangeTop = highRangeTop;
 	}
+	
+	@Override
+	public String toString() {
+		return "Rango Inferior: " + lowRangeUnder + "-" + highRangeTop + "\n" +
+				"Rango Medio: " + mediumRangeUnder + "-" + mediumRangeTop + "\n" +
+				"Rango Superior: " + highRangeUnder + "-" + highRangeTop + "\n";
+	}
 
 }

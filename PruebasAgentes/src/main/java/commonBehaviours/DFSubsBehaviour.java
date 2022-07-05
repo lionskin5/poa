@@ -29,7 +29,7 @@ public abstract class DFSubsBehaviour extends SubscriptionInitiator {
 	
 	@Override
 	protected void handleInform(ACLMessage inform) {
-		System.out.println("INFORM del DF" + inform.toString());
+	//	System.out.println("INFORM del DF" + inform.toString());
 		DFAgentDescription[] dfds = DFServiceManager.decodeNotification(inform);
 		if(dfds.length > 0) {
 			this.agentPerfomance(dfds, inform);

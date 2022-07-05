@@ -3,11 +3,14 @@ package lonja.sellerAgents;
 import java.util.List;
 
 import commonAgents.ExternalAgent;
+import commonAgents.MyAgent;
 import commonBehaviours.DFPhasesSubsBehaviour;
 import commonBehaviours.DFServiceManager;
 import commonBehaviours.DFSubsBehaviour;
 import commonBehaviours.MarketAchieveInitiator;
 import elements.lot.Lot;
+import elements.sea.FishAction;
+import elements.sea.Fishing;
 import elements.sea.RangeAction;
 import elements.sea.RangePrices;
 import factories.FactoriesNames;
@@ -25,6 +28,7 @@ import jade.domain.FIPANames;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import jade.proto.FIPAProtocolNames;
 import loaders.LoaderManager;
 import makers.ACLMaker;
 import makers.MTMaker;
@@ -122,6 +126,32 @@ public class SellerAgent extends ExternalAgent {
 
 		@Override
 		protected void initiatorInfoPerformance(ACLMessage inform) {
+			System.out.println("He recibido un lote en " + myAgent.getName());
+			
+			Fishing fishing = null;
+			Lot lote = null;
+			
+			try {
+				ContentElement ce = myAgent.getContentManager().extractContent(inform);
+				Concept cc = null;
+				if (ce instanceof Action) {
+					cc = ((Action) ce).getAction();
+					if(cc instanceof Fishing) {
+						lote = ((Fishing) cc).getLot();
+						fishing = new Fishing();
+						}
+				}
+			} catch (UngroundedException e) {
+				e.printStackTrace();
+			} catch (CodecException e) {
+				e.printStackTrace();
+			} catch (OntologyException e) {
+				e.printStackTrace();
+			}
+			
+			System.out.println(myAgent.getName() + " ID del Lote: " + lote.hashCode());
+			System.out.println(myAgent.getName() + " ID del Fishing: " + fishing);
+			
 		}
 
 		@Override
@@ -157,6 +187,19 @@ public class SellerAgent extends ExternalAgent {
 			} catch (OntologyException e) {
 				e.printStackTrace();
 			}
+			
+			
+			FishAction compraPescado = new FishAction();
+			compraPescado.setBudget(getBudget()/2);
+			
+			ACLMessage request = ACLMaker.createMessageWithContentConcept(ACLMessage.REQUEST, myAgent.getAID()
+					, FIPANames.InteractionProtocol.FIPA_REQUEST
+					, seaAgent, ((MyAgent) myAgent).getCodec().getName()
+					, ((FactoryOntology) FactoryGlobal.getInstancia(FactoriesNames.SEAFACTORY)).getOnto().getName(), ""+System.currentTimeMillis(),
+						myAgent, compraPescado);
+			
+			// Registrar la pedida de un lote
+			addBehaviour(new FishBehaviour(myAgent, request));
 			
 		}
 
@@ -208,12 +251,9 @@ public class SellerAgent extends ExternalAgent {
 				}
 			System.out.println("Range Sea Request: " + seaAgentRequest);
 			myAgent.addBehaviour(new SeaRangeBehaviour(myAgent, seaAgentRequest));
-			
-			
+					
 		}
-		
 
 	}
-	
 
 }

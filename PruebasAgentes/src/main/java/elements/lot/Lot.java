@@ -14,11 +14,7 @@ public class Lot implements Concept {
 	
 	// Probar más tarde con el constructor que comprueba que la calidad es un valor entre 0 y 10 y, si se puedem comprobar en el set también
 	
-	public Lot(Fish type, Range range, int kg, int quality) {
-		this.type = type;
-		this.range = range;
-		this.kg = kg;
-		this.quality = quality;
+	public Lot() {
 	}
 	
 	@Slot(mandatory = true)
@@ -57,6 +53,10 @@ public class Lot implements Concept {
 //		this.owner = owner;
 //	}
 	
+	@Override
+	public String toString() {
+		return "Lote" + "\n" + "Tipo: " + Fish.values()[type.getIndex()] + "\n" + "Rango: " + range + "\n" + "Kg: " + kg + "\n" + "Calidad: " + quality;
+	}
 	
 
 }

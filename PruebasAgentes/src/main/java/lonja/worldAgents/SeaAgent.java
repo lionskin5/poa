@@ -202,8 +202,20 @@ public class SeaAgent extends ServiceAgent {
 			
 			// Falta por obtener el pescado
 			// Hay que crear los tipos
-			fishResult.setLot(new Lot(Fish.values()[fishType], range, kg, quality+1));			
 			
+			Lot lote = new Lot();
+			lote.setType(Fish.values()[fishType]);
+			lote.setRange(range);
+			lote.setKg(kg);
+			lote.setQuality(quality+1);
+			//new Lot(Fish.values()[fishType], range, kg, quality+1);
+			
+			
+			
+			fishResult.setLot(lote);
+			System.out.println(lote.toString());
+			System.out.println("Sea ID del Lote: " + lote.hashCode());
+			System.out.println("Sea ID del Fishing: " + fishResult);
 			return ACLMaker.createReponseWithContentConcept(request, ACLMessage.INFORM, myAgent, fishResult);
 		}
 		
