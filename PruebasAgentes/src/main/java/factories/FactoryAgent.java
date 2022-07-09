@@ -36,4 +36,16 @@ public class FactoryAgent extends FactoryGlobal {
 		}
 	}
 	
+	public AgentController createAgent2(String name, String agentClass, Object [] args) {
+		
+		AgentController agent = null;
+		
+		try {
+			agent = this.mc.createNewAgent(name, agentClass, args);
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		}
+		return agent;
+	}
+	
 }

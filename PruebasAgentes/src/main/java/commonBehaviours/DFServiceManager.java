@@ -65,7 +65,7 @@ public class DFServiceManager {
 		sd.setType(service);
 		template.addServices(sd);
 		
-		System.out.println("createSUbS " + a.getName() + DFService.createSubscriptionMessage(a, dfName, template, null));
+	//	System.out.println("createSUbS " + a.getName() + DFService.createSubscriptionMessage(a, dfName, template, null));
 		
 		return DFService.createSubscriptionMessage(a, dfName, template, null);
 	}

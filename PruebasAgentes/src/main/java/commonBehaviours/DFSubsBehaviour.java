@@ -29,7 +29,7 @@ public abstract class DFSubsBehaviour extends SubscriptionInitiator {
 	
 	@Override
 	protected void handleInform(ACLMessage inform) {
-		System.out.println("INFORM del DF" + inform.toString());
+	//	System.out.println("INFORM del DF" + inform.toString());
 		DFAgentDescription[] dfds = DFServiceManager.decodeNotification(inform);
 		if(dfds.length > 0) {
 			this.agentPerfomance(dfds, inform);
@@ -38,7 +38,7 @@ public abstract class DFSubsBehaviour extends SubscriptionInitiator {
 		((MyAgent)this.getAgent()).info(FMNames.DF_SUBS_B, FMNames.INFO + " " + inform.getContent());
 	}
 	
-	// Patrón no se qué, aquí cada hijo implementará lo que se hace con el inform
+	// Patrón método plantilla, aquí cada hijo implementará lo que se hace con el inform
 	public abstract void agentPerfomance(DFAgentDescription[] dfds, ACLMessage inform);
 
 }

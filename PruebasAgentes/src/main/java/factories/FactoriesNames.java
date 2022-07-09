@@ -10,6 +10,7 @@ public class FactoriesNames {
 	public static String PHASESFACTORY = "factories.FactoryPhasesOnto";
 	public static String SEAFACTORY = "factories.FactorySeaOnto";
 	public static String CLIENTFACTORY = "factories.FactoryClientOnto";
+	public static String AGENTACTIVITYFACTORY = "factories.FactoryAgentActivity";
 	
 	public static String AGENTFACTORY = "factories.FactoryAgent";
 
