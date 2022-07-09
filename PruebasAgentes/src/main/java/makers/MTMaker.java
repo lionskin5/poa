@@ -13,7 +13,7 @@ public class MTMaker {
 				, MessageTemplate.MatchProtocol(protocol))
 				, MessageTemplate.MatchLanguage(codec))
 				, MessageTemplate.MatchOntology(ontology));
-		System.out.println("El MT: " + mt.toString());
+	//	System.out.println("El MT: " + mt.toString());
 		
 		return mt;
 		
@@ -27,7 +27,7 @@ public class MTMaker {
 				MessageTemplate.MatchLanguage(codec))
 				,MessageTemplate.MatchOntology(ontology));
 		
-		System.out.println("El MT: " + mt.toString());
+	//	System.out.println("El MT: " + mt.toString());
 		
 		return mt;
 		
@@ -40,7 +40,7 @@ public class MTMaker {
 		MessageTemplate mt = MessageTemplate.and(createMT(mtPerf, codec, ontology)
 													, new MessageTemplate(me));
 		
-		System.out.println("El MT: " + mt.toString());
+	//	System.out.println("El MT: " + mt.toString());
 		
 		return mt;
 		
@@ -51,7 +51,7 @@ public class MTMaker {
 		MessageTemplate mt = MessageTemplate.or(createMT(perf1, protocol, codec, ontology)
 												, createMT(perf2, protocol, codec, ontology));	
 			
-		System.out.println("El MT OR: " + mt.toString());
+	//	System.out.println("El MT OR: " + mt.toString());
 		
 		return mt;	
 	}
@@ -60,7 +60,7 @@ public class MTMaker {
 
 		MessageTemplate mt = MessageTemplate.or(mt1, mt2);	
 			
-		System.out.println("El MT: " + mt.toString());
+	//	System.out.println("El MT: " + mt.toString());
 		
 		return mt;	
 	}

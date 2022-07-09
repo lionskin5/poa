@@ -27,6 +27,7 @@ public abstract class LotAgent extends ServiceAgent {
 	// El contenedor se inicializa en la configuración de estos tipos de agentes
 	public LotAgent(String serviceType, String serviceName) {
 		super(serviceType, serviceName);
+		this.factLot = (FactoryOntology) FactoryGlobal.getInstancia(FactoriesNames.LOTFACTORY);
 	}
 	
 	public LotStorage getLotContainer() {
@@ -83,9 +84,7 @@ public abstract class LotAgent extends ServiceAgent {
 			this.registerContainer = (RegisterStorage) args[1];
 			this.request = (MessageTemplate) args[2];
 			// Hay que añadir la factoría al ContentManager
-			this.factLot = (FactoryOntology) FactoryGlobal.getInstancia(FactoriesNames.LOTFACTORY);
 			this.getContentManager().registerOntology(factLot.getOnto());
-		
 			addBehaviour(new LotBehaviour(this, request));
 		}
 		

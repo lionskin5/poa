@@ -12,7 +12,7 @@ import jade.lang.acl.ACLMessage;
 import makers.ACLMaker;
 
 @SuppressWarnings("serial")
-public class DFPhasesSubsBehaviour extends DFSubsBehaviour {
+public abstract class DFPhasesSubsBehaviour extends DFSubsBehaviour {
 
 	public DFPhasesSubsBehaviour(Agent a, ACLMessage msg) {
 		super(a, msg);
@@ -29,7 +29,10 @@ public class DFPhasesSubsBehaviour extends DFSubsBehaviour {
 				, ""+System.currentTimeMillis());
 		
 		System.out.println("Me suscribo al Fases " + phaseAgent);
-		getAgent().addBehaviour(new PhaseUpdaterBehaviour(myAgent, request));		
+		subsPhase(request);
+		//getAgent().addBehaviour(new PhaseUpdaterBehaviour(myAgent, request));
 	}
+	
+	public abstract void subsPhase(ACLMessage request);
 
 }

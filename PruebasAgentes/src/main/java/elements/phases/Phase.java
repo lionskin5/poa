@@ -6,9 +6,17 @@ import jade.content.onto.annotations.Slot;
 @SuppressWarnings("serial")
 public class Phase implements Concept{
 	
+	private String name;
 	private int start;
 	private int end;
 	
+	@Slot(mandatory = true)
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
 	@Slot(mandatory = true)
 	public int getStart() {
 		return start;
@@ -25,7 +33,7 @@ public class Phase implements Concept{
 	}
 	
 	public String toString() {
-		return this.getClass().getName() + "\n" + "[start=" + start + ",\n" + "end=" + end + "]";
+		return "\n" + "[start=" + start + ",\n" + "end=" + end + "]";
 	}
 
 }

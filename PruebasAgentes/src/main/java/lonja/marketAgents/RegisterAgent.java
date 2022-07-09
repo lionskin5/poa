@@ -1,8 +1,5 @@
 package lonja.marketAgents;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import commonBehaviours.DFServiceManager;
 import commonBehaviours.DFSubsBehaviour;
 import commonBehaviours.MarketAchieveInitiator;

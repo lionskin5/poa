@@ -62,7 +62,7 @@ public class SellerAgent extends ExternalAgent {
 			this.getContentManager().registerOntology(factSea.getOnto());
 			
 			addBehaviour(new DFLReceptorSubsBehaviour(this,  DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "lot-receptor-service")));
-			this.addBehaviour(new DFPhasesSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "phases-service")));
+			//this.addBehaviour(new DFPhasesSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "phases-service")));
 			addBehaviour(new DFSeaSubsBehaviour(this, DFServiceManager.createSubscriptionMessage(this, getDefaultDF(), "fish-service")));
 			
 //			// Creo que aquí hay que poner un  BlockingRecieve y el pattern. Simplemente bloquea al agente, pero cuando se desbloquee el DFBehaviourleerá ese mensaje.
